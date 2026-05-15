@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Roulette — Cyberpunk Edition</title>
+  <meta name="description" content="Sistema de estudos gamificado com roleta de matérias, cronômetro e persistência de progresso no navegador." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────────── RESET & ROOT ───────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:   #ff007f;
+      --cyan:   #00f2ff;
+      --purple: #9b30ff;
+      --bg:     #0a0a0a;
+      --bg2:    #0f0f1a;
+      --glass:  rgba(255,255,255,0.04);
+      --border: rgba(0,242,255,0.18);
+      --text:   #e0e0ff;
+      --muted:  #5a5a80;
+      --radius: 16px;
+      --glow-cyan: 0 0 8px #00f2ff88, 0 0 24px #00f2ff44;
+      --glow-pink: 0 0 8px #ff007f88, 0 0 24px #ff007f44;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 10% 0%, rgba(0,242,255,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 90% 100%, rgba(255,0,127,0.07) 0%, transparent 60%);
+    }
+
+    /* ───────────── SCANLINE OVERLAY ───────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ───────────── LAYOUT ───────────── */
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ───────────── HEADER ───────────── */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid var(--cyan);
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 18px;
+      box-shadow: var(--glow-cyan);
+      font-family: 'Orbitron', monospace;
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px rgba(0,242,255,0.35));
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* ───────────── DASHBOARD ───────────── */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      transition: box-shadow 0.3s, border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+    }
+
+    .stat-card:hover {
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 12px rgba(0,242,255,0.6);
+    }
+
+    .stat-value.pink { color: var(--pink); text-shadow: 0 0 12px rgba(255,0,127,0.6); }
+    .stat-value.purple { color: var(--purple); text-shadow: 0 0 12px rgba(155,48,255,0.6); }
+
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ───────────── MAIN GRID ───────────── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 700px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ───────────── ROULETTE SECTION ───────────── */
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,242,255,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .dot {
+      width: 8px; height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: var(--glow-cyan);
+      animation: blink 1.4s infinite;
+    }
+
+    .section-title.pink-accent { color: var(--pink); }
+    .section-title.pink-accent .dot { background: var(--pink); box-shadow: var(--glow-pink); }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* ── Slot Machine Display ── */
+    .slot-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .slot-frame {
+      width: 100%;
+      height: 90px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Gradient masks on top & bottom */
+    .slot-frame::before, .slot-frame::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 28px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .slot-frame::before { top: 0;    background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent); }
+    .slot-frame::after  { bottom: 0; background: linear-gradient(to top,   rgba(10,10,10,0.95), transparent); }
+
+    .slot-reel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      will-change: transform;
+    }
+
+    .slot-item {
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.75rem, 2vw, 1rem);
+      font-weight: 700;
+      text-align: center;
+      padding: 0 16px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .slot-item.active {
+      background: linear-gradient(135deg, rgba(0,242,255,0.12), rgba(255,0,127,0.08));
+      color: #fff;
+      text-shadow: 0 0 16px var(--cyan), 0 0 32px rgba(0,242,255,0.4);
+    }
+
+    /* Neon border beam when spinning */
+    .slot-frame.spinning {
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0,242,255,0.08);
+      animation: framePulse 0.15s linear infinite;
+    }
+
+    @keyframes framePulse {
+      0%   { border-color: var(--cyan); }
+      50%  { border-color: var(--pink); }
+      100% { border-color: var(--cyan); }
+    }
+
+    /* Goal badge */
+    .goal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255,0,127,0.15), rgba(0,242,255,0.1));
+      border: 1px solid rgba(255,0,127,0.4);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.82rem;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    .goal-badge.visible { opacity: 1; transform: translateY(0); }
+    .goal-badge .badge-icon { color: var(--pink); }
+    .goal-badge .badge-hours { color: var(--pink); font-weight: 700; }
+
+    /* ───────────── SPIN BUTTON ───────────── */
+    .spin-btn {
+      width: 100%;
+      padding: 16px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 50%, var(--cyan) 100%);
+      background-size: 200% 200%;
+      background-position: 0% 0%;
+      color: #fff;
+      transition: transform 0.15s, box-shadow 0.3s, background-position 0.6s;
+      box-shadow: 0 4px 24px rgba(255,0,127,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .spin-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent);
+      pointer-events: none;
+    }
+
+    .spin-btn:hover:not(:disabled) {
+      background-position: 100% 100%;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(255,0,127,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+    }
+
+    .spin-btn:active:not(:disabled) { transform: translateY(0); }
+
+    .spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ───────────── TIMER SECTION ───────────── */
+    .timer-display {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .timer-ring-wrapper {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 16px;
+    }
+
+    .timer-ring {
+      transform: rotate(-90deg);
+    }
+
+    .timer-ring-bg { fill: none; stroke: rgba(0,242,255,0.08); }
+
+    .timer-ring-fill {
+      fill: none;
+      stroke: url(#ringGrad);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+      filter: drop-shadow(0 0 6px var(--cyan));
+    }
+
+    .timer-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .timer-digits {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 20px var(--cyan);
+      letter-spacing: 2px;
+    }
+
+    .timer-sub-label {
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .timer-subject {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.82rem;
+      color: var(--cyan);
+      min-height: 22px;
+      text-shadow: 0 0 10px rgba(0,242,255,0.5);
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timer-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
+    /* Timer Buttons */
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .timer-btn {
+      flex: 1;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #startStopBtn {
+      background: rgba(0,242,255,0.1);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    #startStopBtn:hover:not(:disabled) {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: var(--glow-cyan);
+    }
+    #startStopBtn.running {
+      background: rgba(255,0,127,0.12);
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+    #startStopBtn.running:hover {
+      background: var(--pink);
+      color: #fff;
+      box-shadow: var(--glow-pink);
+    }
+
+    #resetBtn {
+      background: rgba(155,48,255,0.1);
+      border-color: var(--purple);
+      color: var(--purple);
+      max-width: 60px;
+    }
+    #resetBtn:hover:not(:disabled) {
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(155,48,255,0.6);
+    }
+
+    .timer-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ───────────── HISTORY TABLE ───────────── */
+    .history-section {
+      margin-top: 32px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cyan) transparent;
+    }
+
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-track { background: transparent; }
+    .history-list::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 2px; }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      transition: border-color 0.2s;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .history-item:hover { border-color: rgba(0,242,255,0.3); }
+
+    .history-subject {
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-date {
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .history-duration {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .history-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 32px 0;
+    }
+
+    /* ───────────── SUBJECTS GRID ───────────── */
+    .subjects-section {
+      margin-top: 32px;
+    }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .subject-chip {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+      cursor: default;
+    }
+
+    .subject-chip:hover {
+      border-color: rgba(0,242,255,0.3);
+      background: rgba(0,242,255,0.06);
+    }
+
+    .subject-chip.active-subject {
+      border-color: var(--cyan);
+      background: rgba(0,242,255,0.1);
+      box-shadow: inset 0 0 12px rgba(0,242,255,0.08);
+    }
+
+    .chip-name {
+      font-size: 0.78rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chip-hours {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chip-hours.has-hours { color: var(--cyan); }
+
+    /* ───────────── CLEAR BUTTON ───────────── */
+    .clear-btn {
+      margin-top: 24px;
+      padding: 10px 24px;
+      background: transparent;
+      border: 1px solid rgba(255,80,80,0.4);
+      border-radius: 8px;
+      color: rgba(255,80,80,0.7);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-btn:hover {
+      background: rgba(255,80,80,0.1);
+      border-color: rgba(255,80,80,0.8);
+      color: #ff5050;
+    }
+
+    /* ───────────── TOAST ───────────── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(10,10,20,0.95);
+      border: 1px solid var(--cyan);
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      box-shadow: var(--glow-cyan), 0 8px 32px rgba(0,0,0,0.6);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s;
+      opacity: 0;
+      z-index: 1000;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ───────────── MISC ───────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 28px 0;
+    }
+
+    .corner-decor {
+      position: absolute;
+      width: 40px; height: 40px;
+      border-color: rgba(0,242,255,0.25);
+      border-style: solid;
+    }
+    .corner-decor.tl { top: 8px; left: 8px;  border-width: 2px 0 0 2px; }
+    .corner-decor.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+    .corner-decor.bl { bottom: 8px; left: 8px;  border-width: 0 0 2px 2px; }
+    .corner-decor.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    /* ───────────── GLITCH on new subject ───────────── */
+    @keyframes glitch {
+      0%   { clip-path: inset(0 0 80% 0); transform: translate(-4px); }
+      20%  { clip-path: inset(20% 0 60% 0); transform: translate(4px); }
+      40%  { clip-path: inset(50% 0 30% 0); transform: translate(-2px); }
+      60%  { clip-path: inset(70% 0 5% 0);  transform: translate(3px); }
+      80%  { clip-path: inset(5% 0 70% 0);  transform: translate(-1px); }
+      100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+    }
+
+    .glitch-anim { animation: glitch 0.4s steps(1) forwards; }
+
+    /* ───────────── PROGRESS BAR FOR GOAL ───────────── */
+    .goal-progress-wrap {
+      margin-top: 12px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 100px;
+      height: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .goal-progress-bar {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      width: 0%;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 8px rgba(0,242,255,0.6);
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══ HEADER ═══ -->
+  <header>
+    <div class="logo-tag">// CYBERPUNK EDU v1.0</div>
+    <h1>Study Roulette</h1>
+    <p class="subtitle">Sorteie sua matéria · Estude com foco · Acumule progresso</p>
+  </header>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <section class="dashboard" aria-label="Painel de progresso">
+    <div class="stat-card">
+      <div class="stat-label">Total Estudado</div>
+      <div class="stat-value" id="totalHoursDisplay">0h 00m</div>
+      <div class="stat-sub">desde o início</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Este Mês</div>
+      <div class="stat-value pink" id="monthHoursDisplay">0h 00m</div>
+      <div class="stat-sub" id="monthLabel">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sessões</div>
+      <div class="stat-value purple" id="sessionsDisplay">0</div>
+      <div class="stat-sub">sessões completadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Matéria Líder</div>
+      <div class="stat-value" id="topSubjectDisplay" style="font-size:1rem; color: var(--cyan);">—</div>
+      <div class="stat-sub" id="topSubjectHours">0h estudadas</div>
+    </div>
+  </section>
+
+  <!-- ═══ MAIN GRID ═══ -->
+  <div class="main-grid">
+
+    <!-- ── ROULETTE CARD ── -->
+    <div class="glass-card">
+      <div class="corner-decor tl"></div>
+      <div class="corner-decor tr"></div>
+      <div class="corner-decor bl"></div>
+      <div class="corner-decor br"></div>
+
+      <div class="section-title">
+        <span class="dot"></span> Roleta de Matérias
+      </div>
+
+      <div class="slot-wrapper">
+        <div class="slot-frame" id="slotFrame">
+          <div class="slot-reel" id="slotReel">
+            <!-- items populated by JS -->
+          </div>
+        </div>
+
+        <div class="goal-badge" id="goalBadge">
+          <span class="badge-icon">⚡</span>
+          <span>Meta de hoje:</span>
+          <span class="badge-hours" id="goalHoursText">0h</span>
+        </div>
+
+        <div class="goal-progress-wrap" id="goalProgressWrap" style="width:100%; display:none;">
+          <div class="goal-progress-bar" id="goalProgressBar"></div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" aria-label="Sortear matéria">
+          ⚡ SORTEAR MATÉRIA
+        </button>
+      </div>
+    </div>
+
+    <!-- ── TIMER CARD ── -->
+    <div class="glass-card">
+      <div class="section-title pink-accent">
+        <span class="dot"></span> Cronômetro de Estudo
+      </div>
+
+      <div class="timer-display">
+        <div class="timer-ring-wrapper" aria-label="Anel de progresso do timer">
+          <svg class="timer-ring" width="160" height="160" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#00f2ff"/>
+                <stop offset="100%" stop-color="#ff007f"/>
+              </linearGradient>
+            </defs>
+            <circle class="timer-ring-bg"   cx="80" cy="80" r="68" stroke-width="6"/>
+            <circle class="timer-ring-fill" id="ringFill" cx="80" cy="80" r="68"
+                    stroke-width="6"
+                    stroke-dasharray="427.26"
+                    stroke-dashoffset="427.26"/>
+          </svg>
+          <div class="timer-label">
+            <div class="timer-digits" id="timerDisplay">00:00:00</div>
+            <div class="timer-sub-label">em curso</div>
+          </div>
+        </div>
+
+        <div class="timer-subject" id="timerSubjectLabel">Nenhuma matéria selecionada</div>
+        <div class="timer-hint" id="timerHint">Sorteie uma matéria e inicie o timer</div>
+      </div>
+
+      <div class="timer-controls">
+        <button class="timer-btn" id="startStopBtn" disabled aria-label="Iniciar ou pausar cronômetro">
+          ▶ INICIAR
+        </button>
+        <button class="timer-btn" id="resetBtn" disabled aria-label="Resetar cronômetro">
+          ↺
+        </button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Session goal mini progress -->
+      <div style="font-size:0.72rem; color:var(--muted); margin-bottom:6px; font-family:'Orbitron',monospace; letter-spacing:1px;">PROGRESSO DA META</div>
+      <div class="goal-progress-wrap" style="display:block;">
+        <div class="goal-progress-bar" id="timerGoalBar"></div>
+      </div>
+      <div style="font-size:0.72rem; color:var(--muted); margin-top:6px;" id="goalProgressLabel">Sem meta definida</div>
+    </div>
+
+  </div><!-- end main-grid -->
+
+  <!-- ═══ SUBJECTS OVERVIEW ═══ -->
+  <div class="glass-card subjects-section">
+    <div class="section-title">
+      <span class="dot"></span> Todas as Matérias
+    </div>
+    <div class="subjects-grid" id="subjectsGrid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY ═══ -->
+  <div class="glass-card history-section" style="margin-top:24px;">
+    <div class="section-title pink-accent">
+      <span class="dot"></span> Histórico de Sessões
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">Nenhuma sessão registrada ainda.</div>
+    </div>
+    <button class="clear-btn" id="clearDataBtn" aria-label="Limpar todos os dados">⚠ Limpar Todos os Dados</button>
+  </div>
+
+</div><!-- end .app -->
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<!-- ════════════════════════ SCRIPT ════════════════════════ -->
+<script>
+  'use strict';
+
+  // ─── SUBJECTS ───
+  const SUBJECTS = [
+    "Leitura e Produção de Textos",
+    "Arquitetura de Dados",
+    "Arte",
+    "Biologia",
+    "Direito e Ética",
+    "Educação Física",
+    "Física D",
+    "Geografia",
+    "Gramática",
+    "História",
+    "Introdução à IA",
+    "Inglês",
+    "Lógica de Programação",
+    "Laboratório Maker",
+    "Literatura",
+    "Matemática",
+    "Robótica e IOT",
+    "Projeto de Vida",
+    "Química",
+    "Soluções de IA"
+  ];
+
+  // ─── STORAGE KEYS ───
+  const SK = {
+    sessions:   'sr_sessions',
+    subjectMap: 'sr_subjectMap',
+  };
+
+  // ─── STATE ───
+  let state = {
+    sessions:   [],    // [{subject, startISO, durationSec}]
+    subjectMap: {},    // { subject: totalSec }
+    currentSubject: null,
+    goalSec: 0,
+    timerSec: 0,
+    timerRunning: false,
+    sessionStartTime: null,
+    _interval: null,
+  };
+
+  // ─── LOAD ───
+  function loadData() {
+    try {
+      const s = localStorage.getItem(SK.sessions);
+      if (s) state.sessions = JSON.parse(s);
+      const m = localStorage.getItem(SK.subjectMap);
+      if (m) state.subjectMap = JSON.parse(m);
+    } catch(e) { console.warn('Load error', e); }
+  }
+
+  function saveData() {
+    localStorage.setItem(SK.sessions, JSON.stringify(state.sessions));
+    localStorage.setItem(SK.subjectMap, JSON.stringify(state.subjectMap));
+  }
+
+  // ─── UTILS ───
+  function secToHMS(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return [h, m, sec].map(v => String(v).padStart(2, '0')).join(':');
+  }
+
+  function secToHM(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return `${h}h ${String(m).padStart(2,'0')}m`;
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' })
+           + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  function showToast(msg, color = 'var(--cyan)') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = color;
+    t.style.color = color;
+    t.style.boxShadow = (color === 'var(--pink)' || color === '#ff007f')
+      ? 'var(--glow-pink), 0 8px 32px rgba(0,0,0,0.6)'
+      : 'var(--glow-cyan), 0 8px 32px rgba(0,0,0,0.6)';
+    t.classList.add('show');
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function getMonthKey() {
+    const n = new Date();
+    return `${n.getFullYear()}-${n.getMonth()}`;
+  }
+
+  // ─── BUILD SLOT REEL ───
+  function buildReel(targetIndex) {
+    const reel = document.getElementById('slotReel');
+    reel.innerHTML = '';
+    const total = 60; // number of items to render for spin illusion
+    for (let i = 0; i < total; i++) {
+      const si = i % SUBJECTS.length;
+      const div = document.createElement('div');
+      div.className = 'slot-item' + (si === targetIndex ? ' active' : '');
+      div.textContent = SUBJECTS[si];
+      reel.appendChild(div);
+    }
+  }
+
+  function initReel() {
+    buildReel(0);
+    const reel = document.getElementById('slotReel');
+    reel.style.transform = 'translateY(0)';
+  }
+
+  // ─── SPIN ANIMATION ───
+  let spinning = false;
+  function spinRoulette() {
+    if (spinning || state.timerRunning) return;
+    spinning = true;
+
+    const frame = document.getElementById('slotFrame');
+    const reel  = document.getElementById('slotReel');
+    const btn   = document.getElementById('spinBtn');
+    btn.disabled = true;
+    frame.classList.add('spinning');
+
+    // Pick random subject
+    const targetIdx = Math.floor(Math.random() * SUBJECTS.length);
+    const goalHours = Math.floor(Math.random() * 4) + 1; // 1-4h
+    state.goalSec = goalHours * 3600;
+
+    buildReel(targetIdx);
+
+    const itemH = 90;
+    const totalItems = reel.children.length;
+    // We want the chosen item near the end visible in center
+    const finalPos = totalItems - SUBJECTS.length + targetIdx;
+    const finalOffset = -(finalPos * itemH);
+
+    // Start from top
+    reel.style.transition = 'none';
+    reel.style.transform = 'translateY(0)';
+
+    // Fast scroll then ease to final
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        reel.style.transition = 'transform 2.4s cubic-bezier(0.25,0.46,0.45,0.94)';
+        reel.style.transform = `translateY(${finalOffset}px)`;
+      });
+    });
+
+    setTimeout(() => {
+      spinning = false;
+      frame.classList.remove('spinning');
+      btn.disabled = false;
+
+      state.currentSubject = SUBJECTS[targetIdx];
+      state.timerSec = 0;
+      state.timerRunning = false;
+      clearInterval(state._interval);
+
+      // Update UI
+      updateTimerDisplay();
+      const subLabel = document.getElementById('timerSubjectLabel');
+      subLabel.classList.add('glitch-anim');
+      subLabel.textContent = state.currentSubject;
+      setTimeout(() => subLabel.classList.remove('glitch-anim'), 450);
+
+      document.getElementById('timerHint').textContent = `Meta: ${goalHours}h — Clique em INICIAR quando estiver pronto`;
+      document.getElementById('startStopBtn').disabled = false;
+      document.getElementById('resetBtn').disabled = false;
+      document.getElementById('startStopBtn').className = 'timer-btn';
+      document.getElementById('startStopBtn').textContent = '▶ INICIAR';
+
+      // Show goal badge
+      const badge = document.getElementById('goalBadge');
+      document.getElementById('goalHoursText').textContent = goalHours + 'h';
+      badge.classList.add('visible');
+
+      const gpw = document.getElementById('goalProgressWrap');
+      gpw.style.display = 'block';
+      updateGoalProgress();
+
+      document.getElementById('goalProgressLabel').textContent =
+        `0 de ${goalHours}h completadas`;
+
+      // Highlight active subject in grid
+      document.querySelectorAll('.subject-chip').forEach(c => {
+        c.classList.toggle('active-subject', c.dataset.subject === state.currentSubject);
+      });
+
+      showToast(`⚡ Sorteado: ${state.currentSubject}`, 'var(--pink)');
+    }, 2600);
+  }
+
+  // ─── TIMER ───
+  function startTimer() {
+    if (!state.currentSubject) return;
+    state.timerRunning = true;
+    state.sessionStartTime = Date.now() - state.timerSec * 1000;
+    state._interval = setInterval(() => {
+      state.timerSec = Math.floor((Date.now() - state.sessionStartTime) / 1000);
+      updateTimerDisplay();
+      updateGoalProgress();
+    }, 500);
+
+    const btn = document.getElementById('startStopBtn');
+    btn.textContent = '⏸ PAUSAR';
+    btn.classList.add('running');
+  }
+
+  function pauseTimer() {
+    state.timerRunning = false;
+    clearInterval(state._interval);
+    const btn = document.getElementById('startStopBtn');
+    btn.textContent = '▶ CONTINUAR';
+    btn.classList.remove('running');
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    state.timerSec = 0;
+    updateTimerDisplay();
+    updateGoalProgress();
+    document.getElementById('startStopBtn').textContent = '▶ INICIAR';
+  }
+
+  function saveSession() {
+    if (!state.currentSubject || state.timerSec < 5) return;
+    const session = {
+      subject:     state.currentSubject,
+      startISO:    new Date(state.sessionStartTime || Date.now()).toISOString(),
+      durationSec: state.timerSec,
+      monthKey:    getMonthKey(),
+    };
+    state.sessions.unshift(session);
+
+    // Update subjectMap
+    if (!state.subjectMap[state.currentSubject]) state.subjectMap[state.currentSubject] = 0;
+    state.subjectMap[state.currentSubject] += state.timerSec;
+
+    saveData();
+    renderDashboard();
+    renderHistory();
+    renderSubjectsGrid();
+    showToast(`✔ Sessão salva: ${secToHMS(state.timerSec)} em ${state.currentSubject}`);
+  }
+
+  function updateTimerDisplay() {
+    document.getElementById('timerDisplay').textContent = secToHMS(state.timerSec);
+
+    // Ring fill — based on goal (max 1 revolution = goal time)
+    const fillEl = document.getElementById('ringFill');
+    const circ = 427.26;
+    const pct = state.goalSec > 0 ? Math.min(state.timerSec / state.goalSec, 1) : 0;
+    fillEl.style.strokeDashoffset = circ * (1 - pct);
+  }
+
+  function updateGoalProgress() {
+    const pct = state.goalSec > 0 ? Math.min((state.timerSec / state.goalSec) * 100, 100) : 0;
+    document.getElementById('timerGoalBar').style.width = pct + '%';
+    document.getElementById('goalProgressBar').style.width = pct + '%';
+
+    if (state.goalSec > 0) {
+      const goalH = state.goalSec / 3600;
+      const doneSec = state.timerSec;
+      document.getElementById('goalProgressLabel').textContent =
+        `${secToHMS(doneSec)} de ${goalH}h — ${Math.round(pct)}%`;
+    }
+
+    if (state.goalSec > 0 && state.timerSec >= state.goalSec && state.timerRunning) {
+      // Goal reached!
+      pauseTimer();
+      saveSession();
+      showToast('🎉 Meta atingida! Sessão salva!', '#00f2ff');
+    }
+  }
+
+  // ─── RENDER ───
+  function renderDashboard() {
+    // Total all time
+    const totalSec = Object.values(state.subjectMap).reduce((a,b) => a+b, 0);
+    document.getElementById('totalHoursDisplay').textContent = secToHM(totalSec);
+
+    // This month
+    const now = new Date();
+    const mk  = getMonthKey();
+    const monthSec = state.sessions
+      .filter(s => s.monthKey === mk)
+      .reduce((a,s) => a + s.durationSec, 0);
+    document.getElementById('monthHoursDisplay').textContent = secToHM(monthSec);
+    document.getElementById('monthLabel').textContent =
+      now.toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+
+    // Sessions count
+    document.getElementById('sessionsDisplay').textContent = state.sessions.length;
+
+    // Top subject
+    let topS = '—', topSec = 0;
+    for (const [s, t] of Object.entries(state.subjectMap)) {
+      if (t > topSec) { topSec = t; topS = s; }
+    }
+    const topEl = document.getElementById('topSubjectDisplay');
+    topEl.textContent = topS === '—' ? '—' : (topS.length > 18 ? topS.slice(0,16)+'…' : topS);
+    document.getElementById('topSubjectHours').textContent =
+      topSec > 0 ? secToHM(topSec) + ' estudadas' : '0h estudadas';
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (state.sessions.length === 0) {
+      list.innerHTML = '<div class="history-empty">Nenhuma sessão registrada ainda.</div>';
+      return;
+    }
+    list.innerHTML = state.sessions.slice(0, 50).map(s => `
+      <div class="history-item">
+        <span class="history-subject">${s.subject}</span>
+        <span class="history-date">${formatDate(s.startISO)}</span>
+        <span class="history-duration">${secToHMS(s.durationSec)}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderSubjectsGrid() {
+    const grid = document.getElementById('subjectsGrid');
+    grid.innerHTML = SUBJECTS.map(s => {
+      const sec = state.subjectMap[s] || 0;
+      const isActive = s === state.currentSubject;
+      return `
+        <div class="subject-chip ${isActive ? 'active-subject' : ''}" data-subject="${s}">
+          <span class="chip-name" title="${s}">${s}</span>
+          <span class="chip-hours ${sec > 0 ? 'has-hours' : ''}">${sec > 0 ? secToHM(sec) : '0h'}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ─── EVENTS ───
+  document.getElementById('spinBtn').addEventListener('click', spinRoulette);
+
+  document.getElementById('startStopBtn').addEventListener('click', () => {
+    if (state.timerRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (state.timerSec > 5 && confirm('Deseja salvar a sessão atual antes de resetar?')) {
+      saveSession();
+    }
+    resetTimer();
+    document.getElementById('timerHint').textContent = 'Timer resetado. Pronto para iniciar.';
+  });
+
+  document.getElementById('clearDataBtn').addEventListener('click', () => {
+    if (confirm('Tem certeza? Todos os dados de estudo serão apagados permanentemente.')) {
+      localStorage.removeItem(SK.sessions);
+      localStorage.removeItem(SK.subjectMap);
+      state.sessions   = [];
+      state.subjectMap = {};
+      state.currentSubject = null;
+      state.goalSec = 0;
+      resetTimer();
+      renderDashboard();
+      renderHistory();
+      renderSubjectsGrid();
+      document.getElementById('goalBadge').classList.remove('visible');
+      document.getElementById('goalProgressWrap').style.display = 'none';
+      document.getElementById('timerSubjectLabel').textContent = 'Nenhuma matéria selecionada';
+      document.getElementById('timerHint').textContent = 'Sorteie uma matéria e inicie o timer';
+      document.getElementById('startStopBtn').disabled = true;
+      document.getElementById('resetBtn').disabled = true;
+      showToast('Dados apagados.', '#ff5050');
+    }
+  });
+
+  // Save on unload/visibility change
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state.timerRunning) {
+      pauseTimer();
+      saveSession();
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (state.timerRunning && state.timerSec > 5) {
+      pauseTimer();
+      saveSession();
+    }
+  });
+
+  // Keyboard shortcut: Space to start/pause
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target === document.body) {
+      e.preventDefault();
+      const btn = document.getElementById('startStopBtn');
+      if (!btn.disabled) btn.click();
+    }
+    if (e.code === 'KeyR' && e.target === document.body) {
+      document.getElementById('resetBtn').click();
+    }
+    if (e.code === 'KeyS' && e.target === document.body) {
+      document.getElementById('spinBtn').click();
+    }
+  });
+
+  // ─── INIT ───
+  loadData();
+  renderDashboard();
+  renderHistory();
+  renderSubjectsGrid();
+  initReel();
+  updateTimerDisplay();
+</script>
+</body>
+</html>
