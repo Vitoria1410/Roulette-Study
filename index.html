@@ -88,6 +88,7 @@
       line-height: 1.1;
       background: linear-gradient(135deg, var(--cyan) 0%, var(--pink) 100%);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 0 18px rgba(0, 242, 255, 0.35));
     }
@@ -932,15 +933,31 @@
       document.getElementById('startStopBtn').disabled = !state.currentSubject;
       document.getElementById('resetBtn').disabled = !state.currentSubject;
 
+      // Contagem Regressiva Visual
+      let displaySec = state.timerSec;
+      const isOvertime = state.goalSec > 0 && state.timerSec > state.goalSec;
+
+      if (state.goalSec > 0) {
+        displaySec = isOvertime ? 0 : state.goalSec - state.timerSec;
+      }
+
+      document.getElementById('timerDisplay').textContent = secToHMS(displaySec);
+      document.getElementById('timerDisplay').style.color = isOvertime ? 'var(--pink)' : '#fff';
+
       // Ring & Progress
       const pct = state.goalSec > 0 ? Math.min(state.timerSec / state.goalSec, 1) : 0;
-      document.getElementById('ringFill').style.strokeDashoffset = 427.26 * (1 - pct);
+      // Ring depletes (isOvertime ? 0 offset : decrease offset)
+      document.getElementById('ringFill').style.strokeDashoffset = 427.26 * (isOvertime ? 0 : (1 - pct));
       document.getElementById('timerGoalBar').style.width = (pct * 100) + '%';
 
       if (state.goalSec > 0) {
-        document.getElementById('goalHoursText').textContent = (state.goalSec / 3600).toFixed(1) + 'h';
+        const goalH = (state.goalSec / 3600).toFixed(1);
+        document.getElementById('goalHoursText').textContent = goalH + 'h';
         document.getElementById('goalBadge').classList.add('visible');
-        document.getElementById('goalProgressLabel').textContent = `${secToHMS(state.timerSec)} DE ${(state.goalSec / 3600).toFixed(1)}H — ${Math.round(pct * 100)}%`;
+
+        const statusText = isOvertime ? 'META CONCLUÍDA (+ EXTRA)' : `${secToHMS(displaySec)} RESTANTES`;
+        document.getElementById('goalProgressLabel').textContent = `${statusText} — ${Math.round(pct * 100)}%`;
+        document.getElementById('timerHint').textContent = isOvertime ? 'Você superou a meta! Continue ou finalize.' : 'Foco total até o tempo esgotar.';
       }
 
       renderDashboard();
@@ -972,7 +989,11 @@
       state._interval = setInterval(() => {
         state.timerSec = Math.floor((Date.now() - state.sessionStartTime) / 1000);
         updateUI();
-        if (state.goalSec > 0 && state.timerSec >= state.goalSec) { pauseTimer(); saveSession(); showToast('🎉 META ATINGIDA!', 'var(--cyan)'); }
+        if (state.goalSec > 0 && state.timerSec === state.goalSec && state.timerRunning) {
+          // Apenas notifica, não para mais automaticamente conforme pedido
+          showToast('🎉 Meta atingida! Continue ou finalize quando quiser.', '#00f2ff');
+          try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch (e) { }
+        }
         if (state.timerSec % 60 === 0) saveData();
       }, 1000);
       document.getElementById('startStopBtn').textContent = '⏸ PAUSAR';
