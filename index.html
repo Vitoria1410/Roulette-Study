@@ -930,8 +930,9 @@
     function updateUI() {
       document.getElementById('timerDisplay').textContent = secToHMS(state.timerSec);
       document.getElementById('timerSubjectLabel').textContent = state.currentSubject || 'Sorteie uma matéria';
-      document.getElementById('startStopBtn').disabled = !state.currentSubject;
-      document.getElementById('resetBtn').disabled = !state.currentSubject;
+      // O botão agora fica sempre ativo para o usuário poder clicar e receber o aviso se esquecer a matéria
+      document.getElementById('startStopBtn').disabled = false;
+      document.getElementById('resetBtn').disabled = false;
 
       // Contagem Regressiva Visual
       let displaySec = state.timerSec;
@@ -984,6 +985,10 @@
     }
 
     function startTimer() {
+      if (!state.currentSubject) {
+        showToast('⚠ Selecione uma matéria primeiro!', '#ff5050');
+        return;
+      }
       state.timerRunning = true;
       state.sessionStartTime = Date.now() - state.timerSec * 1000;
       state._interval = setInterval(() => {
