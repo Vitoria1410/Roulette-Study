@@ -662,6 +662,254 @@
       color: #ff5050;
     }
 
+    /* ── Diary & Study Plan ── */
+    .page-section {
+      display: none;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    .diary-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .custom-textarea {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      resize: vertical;
+      min-height: 100px;
+      transition: 0.3s;
+    }
+
+    .custom-textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+    }
+
+    .action-btn {
+      padding: 12px 24px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      align-self: flex-start;
+    }
+
+    .action-btn.cyan {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3);
+    }
+
+    .action-btn.cyan:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 242, 255, 0.4);
+    }
+
+    .action-btn.pink {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+    }
+
+    .action-btn.pink:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 0, 127, 0.4);
+    }
+
+    .diary-entries,
+    .plan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .diary-entry {
+      background: rgba(0, 242, 255, 0.04);
+      border: 1px solid rgba(0, 242, 255, 0.15);
+      border-radius: 12px;
+      padding: 16px 20px;
+      position: relative;
+    }
+
+    .diary-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .diary-entry-subject {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .diary-entry-date {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .diary-entry-text {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .entry-delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #ff505055;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s;
+      padding: 0 4px;
+    }
+
+    .entry-delete-btn:hover {
+      color: #ff5050;
+    }
+
+    .plan-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(155, 48, 255, 0.05);
+      border: 1px solid rgba(155, 48, 255, 0.18);
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: 0.3s;
+    }
+
+    .plan-item.done {
+      opacity: 0.45;
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .plan-item.done .plan-item-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .plan-item-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--purple);
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+      background: transparent;
+    }
+
+    .plan-item.done .plan-item-check {
+      background: var(--purple);
+      border-color: var(--purple);
+    }
+
+    .plan-item-text {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .plan-item-subject {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem;
+      color: var(--purple);
+      padding: 3px 8px;
+      border: 1px solid rgba(155, 48, 255, 0.3);
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .plan-delete-btn {
+      background: none;
+      border: none;
+      color: #ff505055;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .plan-delete-btn:hover {
+      color: #ff5050;
+    }
+
+    .plan-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .plan-form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .plan-form-row .custom-select {
+      flex: 1;
+    }
+
+    .plan-form-row .custom-input {
+      flex: 2;
+    }
+
+    .timer-active-badge {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(0, 242, 255, 0.08);
+      border: 1px solid rgba(0, 242, 255, 0.3);
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      color: var(--cyan);
+      margin-bottom: 16px;
+    }
+
+    .timer-active-badge.visible {
+      display: flex;
+    }
+
+    .timer-active-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
     .toast {
       position: fixed;
       bottom: 32px;
@@ -737,134 +985,188 @@
     <div class="view-mode-selector">
       <button class="view-tab active" id="tabRoulette" onclick="setViewMode('roulette')">Modo Roleta</button>
       <button class="view-tab" id="tabManual" onclick="setViewMode('manual')">Estudo Livre</button>
+      <button class="view-tab" id="tabDiary" onclick="setPage('diary')">📒 Diário</button>
+      <button class="view-tab" id="tabPlan" onclick="setPage('plan')">📋 A Estudar</button>
     </div>
 
-    <section class="dashboard">
-      <div class="stat-card">
-        <div class="stat-label">Total GERAL</div>
-        <div class="stat-value" id="totalHoursDisplay">0h 00m</div>
-        <div class="stat-sub">tempo total de foco</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Este Mês</div>
-        <div class="stat-value pink" id="monthHoursDisplay">0h 00m</div>
-        <div class="stat-sub" id="monthLabel">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Sessões</div>
-        <div class="stat-value purple" id="sessionsDisplay">0</div>
-        <div class="stat-sub">concluídas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Líder</div>
-        <div id="topSubjectDisplay" style="font-size: 0.9rem; color: var(--cyan); font-weight: 700; margin-top: 4px;">—
-        </div>
-        <div class="stat-sub" id="topSubjectHours">0h estudadas</div>
-      </div>
-    </section>
+    <!-- Timer Active Badge (visible in all tabs) -->
+    <div class="timer-active-badge" id="timerActiveBadge">
+      <div class="timer-active-dot"></div>
+      <span id="timerActiveBadgeText">⏱ Timer rodando: 00:00:00</span>
+    </div>
 
-    <div class="main-grid">
-      <!-- Card: Matéria -->
+    <!-- PAGE: Roulette + Manual -->
+    <div class="page-section active" id="pageMain">
+
+      <section class="dashboard">
+        <div class="stat-card">
+          <div class="stat-label">Total GERAL</div>
+          <div class="stat-value" id="totalHoursDisplay">0h 00m</div>
+          <div class="stat-sub">tempo total de foco</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Este Mês</div>
+          <div class="stat-value pink" id="monthHoursDisplay">0h 00m</div>
+          <div class="stat-sub" id="monthLabel">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sessões</div>
+          <div class="stat-value purple" id="sessionsDisplay">0</div>
+          <div class="stat-sub">concluídas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Líder</div>
+          <div id="topSubjectDisplay" style="font-size: 0.9rem; color: var(--cyan); font-weight: 700; margin-top: 4px;">
+            —
+          </div>
+          <div class="stat-sub" id="topSubjectHours">0h estudadas</div>
+        </div>
+      </section>
+
+      <div class="main-grid">
+        <!-- Card: Matéria -->
+        <div class="glass-card">
+          <div class="corner-decor tl"></div>
+          <div class="corner-decor tr"></div>
+          <div class="section-title"><span class="dot"></span> Matéria</div>
+
+          <div id="rouletteSubView" class="slot-wrapper">
+            <div class="slot-frame" id="slotFrame">
+              <div class="slot-reel" id="slotReel"></div>
+            </div>
+            <button class="spin-btn" id="spinBtn">⚡ SORTEAR MATÉRIA</button>
+          </div>
+
+          <div id="manualSubView" class="manual-controls" style="display:none;">
+            <div class="input-group">
+              <label>Qual o desafio de hoje?</label>
+              <select id="manualSubjectSelect" class="custom-select"></select>
+            </div>
+            <button class="spin-btn" style="background: linear-gradient(135deg, var(--cyan), var(--purple));"
+              onclick="confirmManualSubject()">DEFINIR MATÉRIA</button>
+          </div>
+        </div>
+
+        <!-- Card: Meta -->
+        <div class="glass-card">
+          <div class="section-title"><span class="dot"
+              style="background: var(--purple); box-shadow: 0 0 10px var(--purple);"></span> Meta</div>
+
+          <div id="rouletteGoalView" class="slot-wrapper">
+            <div class="slot-frame" id="goalFrame">
+              <div class="slot-reel" id="goalReel"></div>
+            </div>
+            <button class="spin-btn" id="spinGoalBtn"
+              style="background: linear-gradient(135deg, var(--purple), var(--pink));">⏳ SORTEAR TEMPO</button>
+          </div>
+
+          <div id="manualGoalView" class="manual-controls" style="display:none;">
+            <div class="input-group">
+              <label>Tempo (ex: 1.5 para 1h30)</label>
+              <input type="number" id="manualGoalInput" class="custom-input" step="0.5" min="0.5" max="10"
+                placeholder="Horas">
+            </div>
+            <button class="spin-btn" style="background: linear-gradient(135deg, var(--purple), var(--pink));"
+              onclick="confirmManualGoal()">DEFINIR TEMPO</button>
+          </div>
+
+          <div style="margin: 20px 0; height: 1px; background: rgba(255,255,255,0.05);"></div>
+          <div class="goal-badge" id="goalBadge">
+            <span style="color: var(--pink);">⚡ META:</span>
+            <span id="goalHoursText" style="font-weight: 900;">0h</span>
+          </div>
+        </div>
+
+        <!-- Card: Timer -->
+        <div class="glass-card">
+          <div class="section-title pink-accent"><span class="dot"></span> Cronômetro</div>
+          <div class="timer-display">
+            <div class="timer-ring-wrapper">
+              <svg class="timer-ring" width="160" height="160">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f2ff" />
+                    <stop offset="100%" stop-color="#ff007f" />
+                  </linearGradient>
+                </defs>
+                <circle class="timer-ring-bg" cx="80" cy="80" r="68" />
+                <circle class="timer-ring-fill" id="ringFill" cx="80" cy="80" r="68" />
+              </svg>
+              <div class="timer-label">
+                <div class="timer-digits" id="timerDisplay">00:00:00</div>
+                <div class="timer-sub-label">foco ativo</div>
+              </div>
+            </div>
+            <div class="timer-subject" id="timerSubjectLabel">Sorteie uma matéria</div>
+            <div class="timer-hint" id="timerHint">Pronto para começar?</div>
+          </div>
+          <div class="timer-controls">
+            <button class="timer-btn" id="startStopBtn" disabled>▶ INICIAR</button>
+            <button class="timer-btn" id="resetBtn" disabled>↺</button>
+          </div>
+          <div class="goal-progress-wrap" style="margin-top: 24px;">
+            <div class="goal-progress-bar" id="timerGoalBar"></div>
+          </div>
+          <div
+            style="font-size: 0.65rem; color: var(--muted); margin-top: 8px; text-align: center; font-family: 'Orbitron', monospace;"
+            id="goalProgressLabel">SEM META DEFINIDA</div>
+        </div>
+      </div>
+
       <div class="glass-card">
-        <div class="corner-decor tl"></div>
-        <div class="corner-decor tr"></div>
-        <div class="section-title"><span class="dot"></span> Matéria</div>
-
-        <div id="rouletteSubView" class="slot-wrapper">
-          <div class="slot-frame" id="slotFrame">
-            <div class="slot-reel" id="slotReel"></div>
-          </div>
-          <button class="spin-btn" id="spinBtn">⚡ SORTEAR MATÉRIA</button>
-        </div>
-
-        <div id="manualSubView" class="manual-controls" style="display:none;">
-          <div class="input-group">
-            <label>Qual o desafio de hoje?</label>
-            <select id="manualSubjectSelect" class="custom-select"></select>
-          </div>
-          <button class="spin-btn" style="background: linear-gradient(135deg, var(--cyan), var(--purple));"
-            onclick="confirmManualSubject()">DEFINIR MATÉRIA</button>
+        <div class="section-title"><span class="dot"></span> Matérias</div>
+        <div class="dashboard" id="subjectsGrid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
         </div>
       </div>
 
-      <!-- Card: Meta -->
+      <div class="glass-card" style="margin-top: 24px;">
+        <div class="section-title pink-accent"><span class="dot"></span> Histórico</div>
+        <div class="history-list" id="historyList"></div>
+        <button class="clear-btn" id="clearDataBtn">⚠ LIMPAR TODOS OS DADOS</button>
+      </div>
+    </div> <!-- /pageMain -->
+
+    <!-- PAGE: Diary -->
+    <div class="page-section" id="pageDiary">
+      <div class="glass-card">
+        <div class="section-title"><span class="dot"></span> O que estudei hoje</div>
+        <div class="diary-form">
+          <div class="input-group">
+            <label>Matéria</label>
+            <select id="diarySubjectSelect" class="custom-select"></select>
+          </div>
+          <div class="input-group">
+            <label>O que você estudou hoje?</label>
+            <textarea id="diaryText" class="custom-textarea"
+              placeholder="Descreva o que você estudou, dificuldades, descobertas..."></textarea>
+          </div>
+          <button class="action-btn cyan" onclick="saveDiaryEntry()">+ SALVAR REGISTRO</button>
+        </div>
+        <div class="section-title" style="margin-top:8px;"><span class="dot"></span> Registros Anteriores</div>
+        <div class="diary-entries" id="diaryEntries"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: Study Plan -->
+    <div class="page-section" id="pagePlan">
       <div class="glass-card">
         <div class="section-title"><span class="dot"
-            style="background: var(--purple); box-shadow: 0 0 10px var(--purple);"></span> Meta</div>
-
-        <div id="rouletteGoalView" class="slot-wrapper">
-          <div class="slot-frame" id="goalFrame">
-            <div class="slot-reel" id="goalReel"></div>
+            style="background:var(--purple);box-shadow:0 0 10px var(--purple);"></span> Adicionar Tarefa</div>
+        <div class="plan-form">
+          <div class="plan-form-row">
+            <select id="planSubjectSelect" class="custom-select"></select>
+            <input type="text" id="planTaskInput" class="custom-input" placeholder="Ex: Exercícios pág. 12-15">
           </div>
-          <button class="spin-btn" id="spinGoalBtn"
-            style="background: linear-gradient(135deg, var(--purple), var(--pink));">⏳ SORTEAR TEMPO</button>
+          <button class="action-btn pink" onclick="savePlanItem()">+ ADICIONAR</button>
         </div>
-
-        <div id="manualGoalView" class="manual-controls" style="display:none;">
-          <div class="input-group">
-            <label>Tempo (ex: 1.5 para 1h30)</label>
-            <input type="number" id="manualGoalInput" class="custom-input" step="0.5" min="0.5" max="10"
-              placeholder="Horas">
-          </div>
-          <button class="spin-btn" style="background: linear-gradient(135deg, var(--purple), var(--pink));"
-            onclick="confirmManualGoal()">DEFINIR TEMPO</button>
-        </div>
-
-        <div style="margin: 20px 0; height: 1px; background: rgba(255,255,255,0.05);"></div>
-        <div class="goal-badge" id="goalBadge">
-          <span style="color: var(--pink);">⚡ META:</span>
-          <span id="goalHoursText" style="font-weight: 900;">0h</span>
-        </div>
-      </div>
-
-      <!-- Card: Timer -->
-      <div class="glass-card">
-        <div class="section-title pink-accent"><span class="dot"></span> Cronômetro</div>
-        <div class="timer-display">
-          <div class="timer-ring-wrapper">
-            <svg class="timer-ring" width="160" height="160">
-              <defs>
-                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#00f2ff" />
-                  <stop offset="100%" stop-color="#ff007f" />
-                </linearGradient>
-              </defs>
-              <circle class="timer-ring-bg" cx="80" cy="80" r="68" />
-              <circle class="timer-ring-fill" id="ringFill" cx="80" cy="80" r="68" />
-            </svg>
-            <div class="timer-label">
-              <div class="timer-digits" id="timerDisplay">00:00:00</div>
-              <div class="timer-sub-label">foco ativo</div>
-            </div>
-          </div>
-          <div class="timer-subject" id="timerSubjectLabel">Sorteie uma matéria</div>
-          <div class="timer-hint" id="timerHint">Pronto para começar?</div>
-        </div>
-        <div class="timer-controls">
-          <button class="timer-btn" id="startStopBtn" disabled>▶ INICIAR</button>
-          <button class="timer-btn" id="resetBtn" disabled>↺</button>
-        </div>
-        <div class="goal-progress-wrap" style="margin-top: 24px;">
-          <div class="goal-progress-bar" id="timerGoalBar"></div>
-        </div>
-        <div
-          style="font-size: 0.65rem; color: var(--muted); margin-top: 8px; text-align: center; font-family: 'Orbitron', monospace;"
-          id="goalProgressLabel">SEM META DEFINIDA</div>
+        <div class="section-title"><span class="dot"
+            style="background:var(--purple);box-shadow:0 0 10px var(--purple);"></span> Lista de Tarefas</div>
+        <div class="plan-list" id="planList"></div>
+        <button class="clear-btn" onclick="clearDonePlan()">🗑 REMOVER CONCLUÍDAS</button>
       </div>
     </div>
 
-    <div class="glass-card">
-      <div class="section-title"><span class="dot"></span> Matérias</div>
-      <div class="dashboard" id="subjectsGrid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
-      </div>
-    </div>
-
-    <div class="glass-card" style="margin-top: 24px;">
-      <div class="section-title pink-accent"><span class="dot"></span> Histórico</div>
-      <div class="history-list" id="historyList"></div>
-      <button class="clear-btn" id="clearDataBtn">⚠ LIMPAR TODOS OS DADOS</button>
-    </div>
-  </div>
+  </div> <!-- /app -->
 
   <div class="toast" id="toast"></div>
 
@@ -879,19 +1181,26 @@
       sessions: [], subjectMap: {}, currentSubject: null,
       goalSec: 0, timerSec: 0, timerRunning: false,
       sessionStartTime: null, _interval: null,
+      diary: [], plan: [],
     };
 
+    // ── Persistence ──
     function loadData() {
       try {
         const s = localStorage.getItem('sr_sessions'); if (s) state.sessions = JSON.parse(s);
         const m = localStorage.getItem('sr_subjectMap'); if (m) state.subjectMap = JSON.parse(m);
+        const d = localStorage.getItem('sr_diary'); if (d) state.diary = JSON.parse(d);
+        const p = localStorage.getItem('sr_plan'); if (p) state.plan = JSON.parse(p);
       } catch (e) { console.warn(e); }
     }
     function saveData() {
       localStorage.setItem('sr_sessions', JSON.stringify(state.sessions));
       localStorage.setItem('sr_subjectMap', JSON.stringify(state.subjectMap));
+      localStorage.setItem('sr_diary', JSON.stringify(state.diary));
+      localStorage.setItem('sr_plan', JSON.stringify(state.plan));
     }
 
+    // ── Helpers ──
     function secToHMS(s) {
       const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
       return [h, m, sec].map(v => String(v).padStart(2, '0')).join(':');
@@ -903,6 +1212,7 @@
       t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    // ── Slot Machine ──
     function buildReel(id, list, targetIdx) {
       const r = document.getElementById(id); r.innerHTML = '';
       for (let i = 0; i < 60; i++) {
@@ -927,38 +1237,39 @@
       setTimeout(() => { frame.classList.remove('spinning'); onFinish(targetIdx); }, 2500);
     }
 
+    // ── UI Update ──
     function updateUI() {
-      document.getElementById('timerDisplay').textContent = secToHMS(state.timerSec);
-      document.getElementById('timerSubjectLabel').textContent = state.currentSubject || 'Sorteie uma matéria';
-      // O botão agora fica sempre ativo para o usuário poder clicar e receber o aviso se esquecer a matéria
       document.getElementById('startStopBtn').disabled = false;
       document.getElementById('resetBtn').disabled = false;
 
-      // Contagem Regressiva Visual
       let displaySec = state.timerSec;
       const isOvertime = state.goalSec > 0 && state.timerSec > state.goalSec;
-
-      if (state.goalSec > 0) {
-        displaySec = isOvertime ? 0 : state.goalSec - state.timerSec;
-      }
+      if (state.goalSec > 0) displaySec = isOvertime ? 0 : state.goalSec - state.timerSec;
 
       document.getElementById('timerDisplay').textContent = secToHMS(displaySec);
       document.getElementById('timerDisplay').style.color = isOvertime ? 'var(--pink)' : '#fff';
+      document.getElementById('timerSubjectLabel').textContent = state.currentSubject || 'Sorteie uma matéria';
 
-      // Ring & Progress
       const pct = state.goalSec > 0 ? Math.min(state.timerSec / state.goalSec, 1) : 0;
-      // Ring depletes (isOvertime ? 0 offset : decrease offset)
       document.getElementById('ringFill').style.strokeDashoffset = 427.26 * (isOvertime ? 0 : (1 - pct));
       document.getElementById('timerGoalBar').style.width = (pct * 100) + '%';
 
       if (state.goalSec > 0) {
-        const goalH = (state.goalSec / 3600).toFixed(1);
-        document.getElementById('goalHoursText').textContent = goalH + 'h';
+        document.getElementById('goalHoursText').textContent = (state.goalSec / 3600).toFixed(1) + 'h';
         document.getElementById('goalBadge').classList.add('visible');
+        const statusText = isOvertime ? 'META CONCLUIDA (+ EXTRA)' : `${secToHMS(displaySec)} RESTANTES`;
+        document.getElementById('goalProgressLabel').textContent = `${statusText} -- ${Math.round(pct * 100)}%`;
+        document.getElementById('timerHint').textContent = isOvertime ? 'Voce superou a meta! Continue ou finalize.' : 'Foco total ate o tempo esgotar.';
+      }
 
-        const statusText = isOvertime ? 'META CONCLUÍDA (+ EXTRA)' : `${secToHMS(displaySec)} RESTANTES`;
-        document.getElementById('goalProgressLabel').textContent = `${statusText} — ${Math.round(pct * 100)}%`;
-        document.getElementById('timerHint').textContent = isOvertime ? 'Você superou a meta! Continue ou finalize.' : 'Foco total até o tempo esgotar.';
+      // Timer badge visible in diary/plan tabs
+      const badge = document.getElementById('timerActiveBadge');
+      const badgeText = document.getElementById('timerActiveBadgeText');
+      if (state.timerRunning) {
+        badge.classList.add('visible');
+        badgeText.textContent = `Timer rodando (${state.currentSubject || '?'}): ${secToHMS(state.timerSec)}`;
+      } else {
+        badge.classList.remove('visible');
       }
 
       renderDashboard();
@@ -966,8 +1277,22 @@
       renderSubjectsGrid();
     }
 
+    // ── Page Navigation ──
+    let currentPage = 'main';
+    function setPage(page) {
+      currentPage = page;
+      const pages = { main: 'pageMain', diary: 'pageDiary', plan: 'pagePlan' };
+      Object.values(pages).forEach(id => document.getElementById(id).classList.remove('active'));
+      document.getElementById(pages[page] || 'pageMain').classList.add('active');
+
+      ['tabRoulette', 'tabManual', 'tabDiary', 'tabPlan'].forEach(id => document.getElementById(id).classList.remove('active'));
+      if (page === 'diary') { document.getElementById('tabDiary').classList.add('active'); renderDiary(); }
+      else if (page === 'plan') { document.getElementById('tabPlan').classList.add('active'); renderPlan(); }
+      updateUI();
+    }
+
     function setViewMode(mode) {
-      if (state.timerRunning) { showToast('Pause o timer primeiro!', '#ff5050'); return; }
+      setPage('main');
       const isR = mode === 'roulette';
       document.getElementById('tabRoulette').classList.toggle('active', isR);
       document.getElementById('tabManual').classList.toggle('active', !isR);
@@ -977,42 +1302,39 @@
       document.getElementById('manualGoalView').style.display = isR ? 'none' : 'flex';
     }
 
-    function confirmManualSubject() { state.currentSubject = document.getElementById('manualSubjectSelect').value; updateUI(); showToast('Matéria definida!'); }
+    function confirmManualSubject() { state.currentSubject = document.getElementById('manualSubjectSelect').value; updateUI(); showToast('Materia definida!'); }
     function confirmManualGoal() {
       const v = parseFloat(document.getElementById('manualGoalInput').value);
-      if (isNaN(v) || v <= 0) { showToast('Tempo inválido!', '#ff5050'); return; }
+      if (isNaN(v) || v <= 0) { showToast('Tempo invalido!', '#ff5050'); return; }
       state.goalSec = v * 3600; updateUI(); showToast(`Meta de ${v}h definida!`);
     }
 
+    // ── Timer ──
     function startTimer() {
-      if (!state.currentSubject) {
-        showToast('⚠ Selecione uma matéria primeiro!', '#ff5050');
-        return;
-      }
+      if (!state.currentSubject) { showToast('Selecione uma materia primeiro!', '#ff5050'); return; }
       state.timerRunning = true;
       state.sessionStartTime = Date.now() - state.timerSec * 1000;
       state._interval = setInterval(() => {
         state.timerSec = Math.floor((Date.now() - state.sessionStartTime) / 1000);
         updateUI();
-        if (state.goalSec > 0 && state.timerSec === state.goalSec && state.timerRunning) {
-          // Apenas notifica, não para mais automaticamente conforme pedido
-          showToast('🎉 Meta atingida! Continue ou finalize quando quiser.', '#00f2ff');
+        if (state.goalSec > 0 && state.timerSec === state.goalSec) {
+          showToast('Meta atingida! Continue ou finalize quando quiser.', '#00f2ff');
           try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch (e) { }
         }
         if (state.timerSec % 60 === 0) saveData();
       }, 1000);
-      document.getElementById('startStopBtn').textContent = '⏸ PAUSAR';
+      document.getElementById('startStopBtn').textContent = 'PAUSAR';
       document.getElementById('startStopBtn').classList.add('running');
     }
 
     function pauseTimer() {
       state.timerRunning = false; clearInterval(state._interval);
-      document.getElementById('startStopBtn').textContent = '▶ CONTINUAR';
+      document.getElementById('startStopBtn').textContent = 'CONTINUAR';
       document.getElementById('startStopBtn').classList.remove('running');
     }
 
     function saveSession() {
-      if (!state.currentSubject || state.timerSec < 10) return;
+      if (!state.currentSubject || state.timerSec < 10) return false;
       const session = {
         subject: state.currentSubject, durationSec: state.timerSec,
         startISO: new Date().toISOString(), monthKey: new Date().getFullYear() + '-' + new Date().getMonth()
@@ -1020,13 +1342,15 @@
       state.sessions.unshift(session);
       state.subjectMap[state.currentSubject] = (state.subjectMap[state.currentSubject] || 0) + state.timerSec;
       saveData(); updateUI();
+      return true;
     }
 
+    // ── Dashboard / History / Grid ──
     function renderDashboard() {
       const total = Object.values(state.subjectMap).reduce((a, b) => a + b, 0);
       document.getElementById('totalHoursDisplay').textContent = secToHM(total);
       document.getElementById('sessionsDisplay').textContent = state.sessions.length;
-      let topS = '—', topSec = 0;
+      let topS = '-', topSec = 0;
       for (const [s, t] of Object.entries(state.subjectMap)) if (t > topSec) { topSec = t; topS = s; }
       document.getElementById('topSubjectDisplay').textContent = topS;
       document.getElementById('topSubjectHours').textContent = secToHM(topSec) + ' focadas';
@@ -1037,10 +1361,10 @@
       document.getElementById('historyList').innerHTML = state.sessions.slice(0, 20).map(s => `
       <div class="history-item">
         <span style="font-weight:700;">${s.subject}</span>
-        <span style="color:var(--muted); font-size:0.75rem;">${new Date(s.startISO).toLocaleDateString()}</span>
+        <span style="color:var(--muted); font-size:0.75rem;">${new Date(s.startISO).toLocaleDateString('pt-BR')}</span>
         <span class="history-duration">${secToHMS(s.durationSec)}</span>
       </div>
-    `).join('') || '<div style="color:var(--muted); text-align:center; padding:20px;">Nenhuma sessão ainda</div>';
+    `).join('') || '<div style="color:var(--muted); text-align:center; padding:20px;">Nenhuma sessao ainda</div>';
     }
 
     function renderSubjectsGrid() {
@@ -1052,16 +1376,110 @@
     `).join('');
     }
 
-    // Events
+    // ── Diary ──
+    function saveDiaryEntry() {
+      const subj = document.getElementById('diarySubjectSelect').value;
+      const text = document.getElementById('diaryText').value.trim();
+      if (!text) { showToast('Escreva algo antes de salvar!', '#ff5050'); return; }
+      state.diary.unshift({ id: Date.now(), subject: subj, text, date: new Date().toISOString() });
+      saveData(); renderDiary();
+      document.getElementById('diaryText').value = '';
+      showToast('Registro salvo!');
+    }
+
+    function deleteDiaryEntry(id) {
+      state.diary = state.diary.filter(e => e.id !== id);
+      saveData(); renderDiary();
+    }
+
+    function renderDiary() {
+      const container = document.getElementById('diaryEntries');
+      if (!state.diary.length) {
+        container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:24px;">Nenhum registro ainda</div>';
+        return;
+      }
+      container.innerHTML = state.diary.map(e => `
+        <div class="diary-entry">
+          <button class="entry-delete-btn" onclick="deleteDiaryEntry(${e.id})">x</button>
+          <div class="diary-entry-header">
+            <span class="diary-entry-subject">${e.subject}</span>
+            <span class="diary-entry-date">${new Date(e.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+          </div>
+          <div class="diary-entry-text">${e.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>
+        </div>
+      `).join('');
+    }
+
+    // ── Study Plan ──
+    function savePlanItem() {
+      const subj = document.getElementById('planSubjectSelect').value;
+      const task = document.getElementById('planTaskInput').value.trim();
+      if (!task) { showToast('Descreva a tarefa!', '#ff5050'); return; }
+      state.plan.unshift({ id: Date.now(), subject: subj, task, done: false, date: new Date().toISOString() });
+      saveData(); renderPlan();
+      document.getElementById('planTaskInput').value = '';
+      showToast('Tarefa adicionada!');
+    }
+
+    function togglePlanItem(id) {
+      const item = state.plan.find(p => p.id === id);
+      if (item) { item.done = !item.done; saveData(); renderPlan(); }
+    }
+
+    function deletePlanItem(id) {
+      state.plan = state.plan.filter(p => p.id !== id);
+      saveData(); renderPlan();
+    }
+
+    function clearDonePlan() {
+      state.plan = state.plan.filter(p => !p.done);
+      saveData(); renderPlan(); showToast('Tarefas concluidas removidas!');
+    }
+
+    function renderPlan() {
+      const container = document.getElementById('planList');
+      if (!state.plan.length) {
+        container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:24px;">Nenhuma tarefa ainda</div>';
+        return;
+      }
+      const sorted = [...state.plan].sort((a, b) => a.done - b.done);
+      container.innerHTML = sorted.map(p => `
+        <div class="plan-item ${p.done ? 'done' : ''}">
+          <div class="plan-item-check" onclick="togglePlanItem(${p.id})">${p.done ? 'v' : ''}</div>
+          <span class="plan-item-text">${p.task.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>
+          <span class="plan-item-subject">${p.subject}</span>
+          <button class="plan-delete-btn" onclick="deletePlanItem(${p.id})">x</button>
+        </div>
+      `).join('');
+    }
+
+    // ── Events ──
     document.getElementById('spinBtn').onclick = () => spin('slot', SUBJECTS, (idx) => { state.currentSubject = SUBJECTS[idx]; updateUI(); showToast(`Estudar: ${state.currentSubject}`); });
     document.getElementById('spinGoalBtn').onclick = () => spin('goal', GOAL_OPTIONS, (idx) => { state.goalSec = GOAL_VALUES[idx]; updateUI(); showToast(`Meta: ${GOAL_OPTIONS[idx]}`); });
     document.getElementById('startStopBtn').onclick = () => state.timerRunning ? pauseTimer() : startTimer();
-    document.getElementById('resetBtn').onclick = () => { if (confirm('Salvar e resetar?')) saveSession(); state.timerSec = 0; pauseTimer(); updateUI(); };
+    document.getElementById('resetBtn').onclick = () => {
+      pauseTimer();
+      if (state.timerSec >= 10) {
+        const saved = saveSession();
+        showToast(saved ? 'Sessao salva!' : 'Nada para salvar.', saved ? 'var(--cyan)' : '#ff5050');
+      }
+      state.timerSec = 0;
+      state.goalSec = 0;
+      state.currentSubject = null;
+      document.getElementById('startStopBtn').textContent = 'INICIAR';
+      document.getElementById('goalBadge').classList.remove('visible');
+      document.getElementById('goalProgressLabel').textContent = 'SEM META DEFINIDA';
+      document.getElementById('timerHint').textContent = 'Pronto para comecar?';
+      updateUI();
+    };
     document.getElementById('clearDataBtn').onclick = () => { if (confirm('Apagar TUDO?')) { localStorage.clear(); location.reload(); } };
 
-    // Init
+    // ── Init ──
     loadData();
-    document.getElementById('manualSubjectSelect').innerHTML = SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('');
+    const subjectOptions = SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('manualSubjectSelect').innerHTML = subjectOptions;
+    document.getElementById('diarySubjectSelect').innerHTML = subjectOptions;
+    document.getElementById('planSubjectSelect').innerHTML = subjectOptions;
     buildReel('slotReel', SUBJECTS, 0); buildReel('goalReel', GOAL_OPTIONS, 1);
     updateUI();
   </script>
